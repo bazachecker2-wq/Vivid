@@ -1,0 +1,28 @@
+version: 2.1
+
+jobs:
+  web_build:
+    docker:
+      - image: cimg/node:22.14
+    steps:
+      - checkout
+      - run: cd apps/web && npm install
+      - run: cd apps/web && npm run typecheck
+      - run: cd apps/web && npm run build
+
+  api_test:
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - checkout
+      - run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install -r apps/api/requirements.txt
+          python -m compileall apps/api/app
+
+workflows:
+  build_and_test:
+    jobs:
+      - web_build
+      - api_test
